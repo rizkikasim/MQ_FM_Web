@@ -114,11 +114,10 @@ const Login = () => {
                 <button
                   key={index}
                   onClick={() => setActiveIndex(index)}
-                  className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${
-                    activeIndex === index
+                  className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${activeIndex === index
                       ? "bg-white/70 backdrop-blur-[2px] border border-white/50 shadow-[0_0_8px_2px_rgba(255,255,255,0.4)] scale-110"
                       : "bg-white/40 hover:bg-white/70"
-                  }`}
+                    }`}
                 />
               ))}
             </div>
