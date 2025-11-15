@@ -1,14 +1,12 @@
 import { Navigate } from "react-router-dom";
-import { STORAGE_KEYS } from "../core/constant/storage_constant";
 
-const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+export default function ProtectedRoute({ children }) {
+  const token = localStorage.getItem("token");
 
-  if (!token) {
+  // jika token ga ada, langsung ke login
+  if (!token || token === "undefined" || token === null) {
     return <Navigate to="/login" replace />;
   }
 
   return children;
-};
-
-export default ProtectedRoute;
+}

@@ -9,25 +9,26 @@ import {
   Settings,
 } from "lucide-react";
 
-import { useLoginAuthStore } from "../../core/logic/auth/user/login_auth_zustand/login_auth_zustand";
-import { useLogoutAuthStore } from "../../core/logic/auth/user/logout_auth_zustand/logout_auth_zustand";
+import { useLoginAuthAdminStore } from "../../core/logic/auth/admin/login_auth_zustand/login_auth_zustand.js"
+import { useLogoutAuthAdminStore } from "../../core/logic/auth/admin/logout_auth_zustand/logout_auth_zustand.js";
 import { useNavigate } from "react-router-dom";
 
-const DashboardNavHeader = () => {
+const AdminNavHeader = () => {
   const navigate = useNavigate();
 
-  // Ambil user profile
-  const profileTheme = useLoginAuthStore((state) => state.profileTheme);
-  const resetLogin = useLoginAuthStore((state) => state.resetState);
-  const initial = profileTheme?.initial || "?";
+  // ⬅️ Ambil admin profile dari login store
+  const profileTheme = useLoginAuthAdminStore((state) => state.profileTheme);
+  const resetLogin = useLoginAuthAdminStore((state) => state.resetState);
 
-  // Logout store
-  const logoutUser = useLogoutAuthStore((state) => state.logoutUser);
+  const initial = profileTheme?.initial || "A";
+
+  // ⬅️ Logout store admin
+  const logoutAdmin = useLogoutAuthAdminStore((state) => state.logoutAdmin);
 
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Close dropdown ketika klik di luar
+  // Close dropdown ketika click di luar
   useEffect(() => {
     const handleClick = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -38,22 +39,15 @@ const DashboardNavHeader = () => {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // 🚀 FIX : LOGOUT YANG BENER
+  // 🔥 LOGOUT ADMIN
   const handleLogout = async () => {
     try {
-      await logoutUser(); // call API logout
+      await logoutAdmin();
+      resetLogin();
+      navigate("/admin/login", { replace: true });
     } catch (err) {
       console.log("Logout error:", err);
     }
-
-    // WAJIB: Hapus token user
-    localStorage.removeItem("token");
-
-    // Reset store zustand biar user bersih
-    resetLogin();
-
-    // Redirect
-    navigate("/login", { replace: true });
   };
 
   return (
@@ -67,12 +61,12 @@ const DashboardNavHeader = () => {
           </div>
           <input
             type="text"
-            placeholder="Telusuri lagu, album, artis, podcast"
+            placeholder="Search in admin panel…"
             className="w-full bg-white/10 text-white placeholder-gray-300 rounded-lg py-3 pl-12 pr-3 border border-white/20"
           />
         </div>
 
-        {/* Navigation Links */}
+        {/* Navigation */}
         <nav className="flex items-center gap-2">
           <a className="flex items-center gap-2 px-3 py-2 rounded-md text-white/85 hover:text-white hover:bg-white/10">
             <Home size={18} />
@@ -81,7 +75,7 @@ const DashboardNavHeader = () => {
 
           <a className="flex items-center gap-2 px-3 py-2 rounded-md text-white/85 hover:text-white hover:bg-white/10">
             <Compass size={18} />
-            <span className="font-medium">Explore</span>
+            <span className="font-medium">Overview</span>
           </a>
         </nav>
 
@@ -92,7 +86,7 @@ const DashboardNavHeader = () => {
           {/* Profile Bubble */}
           <div
             onClick={() => setOpen(!open)}
-            className="w-8 h-8 bg-purple-600/80 rounded-full flex items-center justify-center 
+            className="w-8 h-8 bg-blue-600/80 rounded-full flex items-center justify-center 
                        font-bold text-sm text-white cursor-pointer hover:scale-105 transition"
           >
             {initial}
@@ -104,7 +98,7 @@ const DashboardNavHeader = () => {
                          border border-white/10 rounded-xl shadow-xl py-2 z-50">
 
               <button className="w-full flex items-center gap-2 px-4 py-2 text-white/90 hover:bg-white/10">
-                <User size={16} /> Profile
+                <User size={16} /> Admin Profile
               </button>
 
               <button className="w-full flex items-center gap-2 px-4 py-2 text-white/90 hover:bg-white/10">
@@ -113,6 +107,7 @@ const DashboardNavHeader = () => {
 
               <div className="border-t border-white/10 my-1"></div>
 
+              {/* 🔥 LOGOUT ADMIN */}
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center gap-2 px-4 py-2 text-red-400 hover:bg-white/10"
@@ -127,4 +122,4 @@ const DashboardNavHeader = () => {
   );
 };
 
-export default DashboardNavHeader;
+export default AdminNavHeader;

@@ -1,18 +1,26 @@
+// src/core/helper/http_client.js
+
 import axios from "axios";
 import { AuthHeader } from "./auth_header_helper";
+import { API } from "../constant/api_constant";
 
+// base axios
 export const http = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL, // atau API.BASE_URL
+  baseURL: API.BASE_URL,
 });
 
-// AUTO inject header token
+// inject token dan JSON
 http.interceptors.request.use(
   (config) => {
+    const url = config.url || "";
+
     config.headers = {
       ...config.headers,
-      ...AuthHeader(),
+      ...AuthHeader(url),  // ⬅️ FIX UTAMA
+      Accept: "application/json",
     };
     return config;
   },
   (error) => Promise.reject(error)
 );
+

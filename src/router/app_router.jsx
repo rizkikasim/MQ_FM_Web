@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
 
 import HomePage from "../home/HomePage";
 import Login from "../components/auth/Login";
@@ -9,32 +8,34 @@ import PlayerScreen from "../core/shared/player/playerScreen";
 
 import ProtectedRoute from "./ProtectedRoute";
 
-// 🔥 ADMIN IMPORTS
+// 🔥 ADMIN
 import ProtectedAdminRoute from "./ProtectedAdminRoute";
 import RegisterAdmin from "../components/auth/admin/Register";
 import LoginAdmin from "../components/auth/admin/Login";
 import DashboardAdmin from "../dashboard/admin/DashboardAdmin";
+import CategoriesCreate from "../components/admin/categoryCreate/CategoriesCreate";
+import ResendPodcast from "../components/admin/resendPodcast/ResendPodcast";
+
+// ⭐ NEW PAGES
+import MostPopularCard from "../components/admin/mostPopular/MostPopularCard";
+import TotalPlays from "../components/admin/TotalPlays/TotalPlays";
+
+// 🔥 FIX UTAMA → AMBIL TOKEN ADMIN DARI ZUSTAND PERSIST
+import { getAdminToken } from "../core/helper/getAdminToken";
 
 function AppRouter() {
-  const [token, setToken] = useState(localStorage.getItem("token"));
-  const [adminToken, setAdminToken] = useState(localStorage.getItem("admin_token"));
 
-  useEffect(() => {
-    const sync = () => {
-      setToken(localStorage.getItem("token"));
-      setAdminToken(localStorage.getItem("admin_token"));
-    };
-    window.addEventListener("storage", sync);
-    return () => window.removeEventListener("storage", sync);
-  }, []);
+  // USER TOKEN
+  const token = localStorage.getItem("token");
+
+  // ADMIN TOKEN (ANTI LOOP)
+  const adminToken = getAdminToken();
 
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* ===========================
-            USER ROUTES
-        ============================ */}
+        {/* USER ROUTES */}
         <Route path="/" element={<HomePage />} />
 
         <Route
@@ -59,9 +60,7 @@ function AppRouter() {
         <Route path="/player" element={<PlayerScreen />} />
 
 
-        {/* ===========================
-            ADMIN ROUTES
-        ============================ */}
+        {/* ADMIN ROUTES */}
         <Route
           path="/admin/login"
           element={
@@ -89,6 +88,42 @@ function AppRouter() {
           element={
             <ProtectedAdminRoute>
               <DashboardAdmin />
+            </ProtectedAdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/category/create"
+          element={
+            <ProtectedAdminRoute>
+              <CategoriesCreate />
+            </ProtectedAdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/podcast/recent"
+          element={
+            <ProtectedAdminRoute>
+              <ResendPodcast />
+            </ProtectedAdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/podcast/most-popular"
+          element={
+            <ProtectedAdminRoute>
+              <MostPopularCard />
+            </ProtectedAdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/podcast/total-plays"
+          element={
+            <ProtectedAdminRoute>
+              <TotalPlays />
             </ProtectedAdminRoute>
           }
         />

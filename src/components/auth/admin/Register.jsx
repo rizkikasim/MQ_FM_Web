@@ -4,6 +4,9 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { carouselItems } from "../../../data/item/ItemLogin";
 import { Link } from "react-router-dom";
 
+// ⬅️ IMPORT ZUSTAND ADMIN
+import { useRegisterAuthAdminStore } from "../../../core/logic/auth/admin/register_auth_zustand/register_auth_zustand";
+
 const RegisterAdmin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -14,6 +17,15 @@ const RegisterAdmin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  // ⬅️ AMBIL STATE & ACTION DARI STORE
+  const {
+    loading,
+    error,
+    success,
+    registerAdmin,
+    resetState,
+  } = useRegisterAuthAdminStore();
 
   // AUTO SLIDE BG
   useEffect(() => {
@@ -36,16 +48,34 @@ const RegisterAdmin = () => {
     exit: { opacity: 0, y: -25, transition: { duration: 0.6, ease: "easeIn" } },
   };
 
-  // PURE UI → no submit logic
-  const handleRegister = (e) => {
+  // 🚀 IMPLEMENTASI REGISTER ADMIN
+  const handleRegister = async (e) => {
     e.preventDefault();
-    // kosong, tidak ada logic
+
+    resetState();
+
+    const payload = {
+      full_name     : fullName,
+      username      : username,
+      phone         : phone,
+      email         : email,
+      password      : password,
+      confirmPassword: confirmPassword,
+    };
+
+    try {
+      await registerAdmin(payload);
+      // di sini nanti kalau mau redirect tinggal tambahin
+      // navigate("/admin/dashboard");
+    } catch (err) {
+      console.log("Register admin gagal:", err);
+    }
   };
 
   return (
     <div className="flex min-h-screen text-gray-900 relative overflow-hidden">
 
-      {/* LEFT PANEL (FORM) */}
+      {/* LEFT PANEL */}
       <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 sm:p-12 text-white relative z-20">
         <div className="w-full max-w-md">
 
@@ -60,9 +90,20 @@ const RegisterAdmin = () => {
 
           <h1 className="text-3xl font-bold mb-6 text-left">Register Admin</h1>
 
+          {/* ERROR */}
+          {error && (
+            <p className="text-red-400 mb-3 text-sm">{error}</p>
+          )}
+
+          {/* SUCCESS */}
+          {success && (
+            <p className="text-green-400 mb-3 text-sm">
+              Admin account created successfully!
+            </p>
+          )}
+
           {/* FORM */}
           <form onSubmit={handleRegister}>
-
             {/* Full Name */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -163,8 +204,9 @@ const RegisterAdmin = () => {
             <button
               type="submit"
               className="w-full bg-blue-600 text-white p-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 shadow-lg"
+              disabled={loading}
             >
-              Create Admin Account
+              {loading ? "Creating..." : "Create Admin Account"}
             </button>
 
             {/* Login link */}
@@ -184,9 +226,8 @@ const RegisterAdmin = () => {
         </div>
       </div>
 
-      {/* RIGHT PANEL (BACKGROUND SLIDER) */}
+      {/* RIGHT PANEL */}
       <div className="hidden md:flex md:w-1/2 items-center justify-center p-8 lg:p-12 relative overflow-hidden">
-
         <AnimatePresence mode="wait">
           <motion.div
             key={activeIndex}

@@ -1,18 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import icGoogle from "../../../assets/icons/ic_google.png";
-import { carouselItems } from "../../../data/item/ItemLogin";
-import { Link } from "react-router-dom";
+import { carouselItems } from "../../../data/item/ItemLogin.jsx";
+import { useNavigate } from "react-router-dom";
+
+// 🔥 Zustand login khusus admin
+import { useLoginAuthAdminStore } from "../../../core/logic/auth/admin/login_auth_zustand/login_auth_zustand.js";
 
 const LoginAdmin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
 
+  // FORM STATE
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
 
-  // Auto slide
+  // Ambil dari Zustand admin
+  const { loading, error, loginAdmin } = useLoginAuthAdminStore();
+
+  const navigate = useNavigate();
+
+  // Auto carousel
   useEffect(() => {
     const timer = setInterval(
       () => setActiveIndex((prev) => (prev + 1) % carouselItems.length),
@@ -22,6 +30,19 @@ const LoginAdmin = () => {
   }, []);
 
   const currentItem = carouselItems[activeIndex];
+
+  // 🔥 LOGIN + REDIRECT DI SINI
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const payload = { identifier, password };
+
+    try {
+      await loginAdmin(payload);
+      navigate("/admin/dashboard", { replace: true }); // ⬅️ FIX UTAMA
+    } catch (err) {
+      console.log("Login error:", err);
+    }
+  };
 
   const textVariants = {
     hidden: { opacity: 0, y: 25 },
@@ -100,34 +121,30 @@ const LoginAdmin = () => {
       <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 sm:p-12 text-white relative z-20">
         <div className="w-full max-w-md">
 
-          {/* Branding */}
           <div className="flex items-center justify-center mb-8">
             <div className="flex items-center space-x-2">
-              <span className="w-7 h-7 rounded-full bg-green-400 opacity-90"></span>
-              <span className="w-7 h-7 rounded-full bg-green-600 -ml-5"></span>
+              <span className="w-7 h-7 rounded-full bg-blue-400 opacity-90"></span>
+              <span className="w-7 h-7 rounded-full bg-blue-600 -ml-5"></span>
             </div>
-            <span className="text-3xl font-bold ml-2">CoLabs Admin</span>
+            <span className="text-3xl font-bold ml-2">Admin Panel</span>
           </div>
 
           <h1 className="text-3xl font-bold mb-6 text-left">Admin Login</h1>
 
-          <form>
-
-            {/* IDENTIFIER */}
+          <form onSubmit={handleLogin}>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Identifier
+                Admin Identifier
               </label>
               <input
                 type="text"
-                className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white"
-                placeholder="Email / username"
+                className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Admin email / username"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
               />
             </div>
 
-            {/* PASSWORD */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Password
@@ -135,13 +152,13 @@ const LoginAdmin = () => {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white"
+                  className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter admin password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
                 <div
-                  className="absolute inset-y-0 right-3 flex items-center cursor-pointer text-gray-400"
+                  className="absolute inset-y-0 right-3 flex items-center cursor-pointer text-gray-400 hover:text-white"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <AiOutlineEyeInvisible size={22} /> : <AiOutlineEye size={22} />}
@@ -149,37 +166,17 @@ const LoginAdmin = () => {
               </div>
             </div>
 
-            {/* ERROR */}
-            {false && <p className="text-red-400 text-sm mb-2">Error message</p>}
+            {error && <p className="text-red-400 text-sm mb-2">{error}</p>}
 
-            {/* BUTTON LOGIN */}
-            <button className="w-full bg-green-600 text-white p-3 rounded-lg font-semibold hover:bg-green-700 transition duration-300 shadow-lg">
-              Sign in
-            </button>
-
-            {/* GOOGLE SIGN-IN (ADMIN VERSION) */}
             <button
-              type="button"
-              className="w-full bg-white text-gray-700 p-3 rounded-lg font-semibold border border-gray-300 hover:bg-gray-50 transition duration-300 shadow-lg mt-4 flex items-center justify-center"
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white p-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 shadow-lg"
             >
-              <img src={icGoogle} alt="Google" className="w-5 h-5 mr-2 object-contain" />
-              Sign in with Google
+              {loading ? "Loading..." : "Sign in as Admin"}
             </button>
-
-            {/* REGISTER ADMIN */}
-            <div className="text-center mt-8">
-              <span className="text-sm text-gray-400">
-                Don’t have an admin account?{" "}
-                <Link
-                  to="/admin/register"
-                  className="font-semibold text-green-400 hover:underline"
-                >
-                  Register admin
-                </Link>
-              </span>
-            </div>
-
           </form>
+
         </div>
       </div>
     </div>
