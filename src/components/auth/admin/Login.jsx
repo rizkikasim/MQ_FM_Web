@@ -3,16 +3,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import icGoogle from "../../../assets/icons/ic_google.png";
 import { carouselItems } from "../../../data/item/ItemLogin";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useLoginAdminStore } from "../../../logic/store/auth/useLoginAdminStore";
 
 const LoginAdmin = () => {
+  const navigate = useNavigate();
+  const { loginAdmin, loading, error, success, resetState } = useLoginAdminStore();
+
   const [showPassword, setShowPassword] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const [identifier, setIdentifier] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // Auto slide
   useEffect(() => {
     const timer = setInterval(
       () => setActiveIndex((prev) => (prev + 1) % carouselItems.length),
@@ -20,6 +23,16 @@ const LoginAdmin = () => {
     );
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        resetState();
+        navigate("/admin/dashboard");
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [success, navigate, resetState]);
 
   const currentItem = carouselItems[activeIndex];
 
@@ -33,10 +46,17 @@ const LoginAdmin = () => {
     exit: { opacity: 0, y: -25, transition: { duration: 0.6, ease: "easeIn" } },
   };
 
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      await loginAdmin({ email, password });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="flex min-h-screen text-gray-900 relative overflow-hidden">
-
-      {/* LEFT PANEL */}
       <div className="hidden md:flex md:w-1/2 items-center justify-center p-8 lg:p-12 relative overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
@@ -96,11 +116,8 @@ const LoginAdmin = () => {
         </div>
       </div>
 
-      {/* RIGHT PANEL */}
       <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 sm:p-12 text-white relative z-20">
         <div className="w-full max-w-md">
-
-          {/* Branding */}
           <div className="flex items-center justify-center mb-8">
             <div className="flex items-center space-x-2">
               <span className="w-7 h-7 rounded-full bg-green-400 opacity-90"></span>
@@ -111,23 +128,32 @@ const LoginAdmin = () => {
 
           <h1 className="text-3xl font-bold mb-6 text-left">Admin Login</h1>
 
-          <form>
+          {error && (
+            <div className="mb-4 p-3 bg-red-500/20 border border-red-500 rounded text-red-200 text-sm">
+              {error}
+            </div>
+          )}
 
-            {/* IDENTIFIER */}
+          {success && (
+            <div className="mb-4 p-3 bg-green-500/20 border border-green-500 rounded text-green-200 text-sm">
+              Login successful! Redirecting...
+            </div>
+          )}
+
+          <form onSubmit={handleLogin}>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Identifier
+                Email
               </label>
               <input
-                type="text"
+                type="email"
                 className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white"
-                placeholder="Email / username"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder="example@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
-            {/* PASSWORD */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Password
@@ -144,29 +170,39 @@ const LoginAdmin = () => {
                   className="absolute inset-y-0 right-3 flex items-center cursor-pointer text-gray-400"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <AiOutlineEyeInvisible size={22} /> : <AiOutlineEye size={22} />}
+                  {showPassword ? (
+                    <AiOutlineEyeInvisible size={22} />
+                  ) : (
+                    <AiOutlineEye size={22} />
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* ERROR */}
-            {false && <p className="text-red-400 text-sm mb-2">Error message</p>}
-
-            {/* BUTTON LOGIN */}
-            <button className="w-full bg-green-600 text-white p-3 rounded-lg font-semibold hover:bg-green-700 transition duration-300 shadow-lg">
-              Sign in
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full text-white p-3 rounded-lg font-semibold transition duration-300 shadow-lg ${
+                loading
+                  ? "bg-green-800 cursor-not-allowed"
+                  : "bg-green-600 hover:bg-green-700"
+              }`}
+            >
+              {loading ? "Signing in..." : "Sign in"}
             </button>
 
-            {/* GOOGLE SIGN-IN (ADMIN VERSION) */}
             <button
               type="button"
               className="w-full bg-white text-gray-700 p-3 rounded-lg font-semibold border border-gray-300 hover:bg-gray-50 transition duration-300 shadow-lg mt-4 flex items-center justify-center"
             >
-              <img src={icGoogle} alt="Google" className="w-5 h-5 mr-2 object-contain" />
+              <img
+                src={icGoogle}
+                alt="Google"
+                className="w-5 h-5 mr-2 object-contain"
+              />
               Sign in with Google
             </button>
 
-            {/* REGISTER ADMIN */}
             <div className="text-center mt-8">
               <span className="text-sm text-gray-400">
                 Don’t have an admin account?{" "}
@@ -178,7 +214,6 @@ const LoginAdmin = () => {
                 </Link>
               </span>
             </div>
-
           </form>
         </div>
       </div>

@@ -14,8 +14,7 @@ export const useBannerLandingStore = create((set, get) => ({
   currentTime: 0,
 
   setRefs: (refs) => set(refs),
-
-  // ✅ init audio pertama agar TrackPlayer langsung bisa baca durasi & update progress
+s
   initFirstAudio: () => {
     const { selectedSlide, audioRef, updateProgress, handleEnded } = get();
     let audio = audioRef;

@@ -6,14 +6,21 @@ import Login from "../components/auth/Login";
 import Register from "../components/auth/Register";
 import DashboardUser from "../dashboard/user/DashboardUser";
 import PlayerScreen from "../core/shared/player/playerScreen";
-
 import ProtectedRoute from "./ProtectedRoute";
 
-// 🔥 ADMIN IMPORTS
 import ProtectedAdminRoute from "./ProtectedAdminRoute";
 import RegisterAdmin from "../components/auth/admin/Register";
 import LoginAdmin from "../components/auth/admin/Login";
 import DashboardAdmin from "../dashboard/admin/DashboardAdmin";
+
+import AudioAdmin from "../components/audio/AudioAdmin";
+import AudioUpload from "../components/audio/AudioUpload";
+import AudioEdit from "../components/audio/AudioEdit";
+
+import CategoryAdmin from "../components/category/CategoryAdmin";
+import CategoryCreate from "../components/category/CategoryCreate";
+import CategoryEdit from "../components/category/CategoryEdit";
+
 
 function AppRouter() {
   const [token, setToken] = useState(localStorage.getItem("token"));
@@ -31,67 +38,24 @@ function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-
-        {/* ===========================
-            USER ROUTES
-        ============================ */}
         <Route path="/" element={<HomePage />} />
-
-        <Route
-          path="/login"
-          element={token ? <Navigate to="/dashboard" replace /> : <Login />}
-        />
-
-        <Route
-          path="/register"
-          element={token ? <Navigate to="/dashboard" replace /> : <Register />}
-        />
-
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardUser />
-            </ProtectedRoute>
-          }
-        />
-
+        <Route path="/login" element={token ? <Navigate to="/dashboard" replace /> : <Login />} />
+        <Route path="/register" element={token ? <Navigate to="/dashboard" replace /> : <Register />} />
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardUser /></ProtectedRoute>} />
         <Route path="/player" element={<PlayerScreen />} />
 
+        <Route path="/admin/login" element={adminToken ? <Navigate to="/admin/dashboard" replace /> : <LoginAdmin />} />
+        <Route path="/admin/register" element={adminToken ? <Navigate to="/admin/dashboard" replace /> : <RegisterAdmin />} />
 
-        {/* ===========================
-            ADMIN ROUTES
-        ============================ */}
-        <Route
-          path="/admin/login"
-          element={
-            adminToken ? (
-              <Navigate to="/admin/dashboard" replace />
-            ) : (
-              <LoginAdmin />
-            )
-          }
-        />
+        <Route path="/admin/dashboard" element={<ProtectedAdminRoute><DashboardAdmin /></ProtectedAdminRoute>} />
+        
+        <Route path="/admin/category" element={<ProtectedAdminRoute><CategoryAdmin /></ProtectedAdminRoute>} />
+        <Route path="/admin/category/create" element={<ProtectedAdminRoute><CategoryCreate /></ProtectedAdminRoute>} />
+        <Route path="/admin/category/edit/:id" element={<ProtectedAdminRoute><CategoryEdit /></ProtectedAdminRoute>} />
 
-        <Route
-          path="/admin/register"
-          element={
-            adminToken ? (
-              <Navigate to="/admin/dashboard" replace />
-            ) : (
-              <RegisterAdmin />
-            )
-          }
-        />
-
-        <Route
-          path="/admin/dashboard"
-          element={
-            <ProtectedAdminRoute>
-              <DashboardAdmin />
-            </ProtectedAdminRoute>
-          }
-        />
+        <Route path="/admin/audio" element={<ProtectedAdminRoute><AudioAdmin /></ProtectedAdminRoute>} />
+        <Route path="/admin/audio/edit/:id" element={<ProtectedAdminRoute><AudioEdit /></ProtectedAdminRoute>} />
+        <Route path="/admin/audio/upload" element={<ProtectedAdminRoute><AudioUpload /></ProtectedAdminRoute>} />
 
       </Routes>
     </BrowserRouter>
