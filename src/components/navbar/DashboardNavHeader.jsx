@@ -8,27 +8,22 @@ import {
   User,
   Settings,
 } from "lucide-react";
-
-import { useLoginAuthStore } from "../../core/logic/auth/user/login_auth_zustand/login_auth_zustand";
-import { useLogoutAuthStore } from "../../core/logic/auth/user/logout_auth_zustand/logout_auth_zustand";
 import { useNavigate } from "react-router-dom";
+import { useAdminAuthStore } from "../../logic/store/auth/useAdminAuthStore";
+import { useLogoutAdminStore } from "../../logic/store/auth/useLogoutAdminStore";
 
 const DashboardNavHeader = () => {
   const navigate = useNavigate();
-
-  // ⬅️ Ambil user profile dari login store
-  const profileTheme = useLoginAuthStore((state) => state.profileTheme);
-  const resetLogin = useLoginAuthStore((state) => state.resetState);
-
-  const initial = profileTheme?.initial || "?";
-
-  // ⬅️ Logout store
-  const logoutUser = useLogoutAuthStore((state) => state.logoutUser);
+  
+  // Store untuk Profile Data
+  const { admin, resetState } = useAdminAuthStore();
+  
+  // Store untuk Logout Action
+  const { logoutAdmin } = useLogoutAdminStore();
 
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Close dropdown ketika click di luar
   useEffect(() => {
     const handleClick = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -39,17 +34,23 @@ const DashboardNavHeader = () => {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // 🔥 LOGOUT
-const handleLogout = async () => {
-  try {
-    await logoutUser();
-    resetLogin();
-    navigate("/login", { replace: true });
-  } catch (err) {
-    console.log("Logout error:", err);
-  }
-};
-
+  const handleLogout = async () => {
+    try {
+      // 1. Panggil API Logout
+      await logoutAdmin();
+      
+      // 2. Bersihkan state profile di memori
+      resetState();
+      
+      // 3. Redirect ke login
+      navigate("/admin/login");
+    } catch (err) {
+      console.error("Logout error:", err);
+      // Jika API error, tetap paksa logout di frontend agar tidak stuck
+      resetState();
+      navigate("/admin/login");
+    }
+  };
 
   return (
     <div className="relative flex items-center w-full gap-4 px-2 py-4 pl-24">
@@ -62,22 +63,21 @@ const handleLogout = async () => {
           </div>
           <input
             type="text"
-            placeholder="Telusuri lagu, album, artis, podcast"
+            placeholder="Search..."
             className="w-full bg-white/10 text-white placeholder-gray-300 rounded-lg py-3 pl-12 pr-3 border border-white/20"
           />
         </div>
 
         {/* Navigation Links */}
         <nav className="flex items-center gap-2">
-          <a className="flex items-center gap-2 px-3 py-2 rounded-md text-white/85 hover:text-white hover:bg-white/10">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-md text-white/85 hover:text-white hover:bg-white/10 cursor-pointer">
             <Home size={18} />
             <span className="font-medium">Home</span>
-          </a>
-
-          <a className="flex items-center gap-2 px-3 py-2 rounded-md text-white/85 hover:text-white hover:bg-white/10">
+          </div>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-md text-white/85 hover:text-white hover:bg-white/10 cursor-pointer">
             <Compass size={18} />
             <span className="font-medium">Explore</span>
-          </a>
+          </div>
         </nav>
 
         {/* Right Actions */}
@@ -88,15 +88,22 @@ const handleLogout = async () => {
           <div
             onClick={() => setOpen(!open)}
             className="w-8 h-8 bg-purple-600/80 rounded-full flex items-center justify-center 
-                       font-bold text-sm text-white cursor-pointer hover:scale-105 transition"
+                        text-white cursor-pointer hover:scale-105 transition shadow-lg border border-white/10"
           >
-            {initial}
+            <User size={18} />
           </div>
 
           {/* Dropdown */}
           {open && (
             <div className="absolute right-0 top-12 w-48 bg-black/90 backdrop-blur-xl 
-                         border border-white/10 rounded-xl shadow-xl py-2 z-50">
+                          border border-white/10 rounded-xl shadow-xl py-2 z-50">
+              
+              <div className="px-4 py-2 text-xs text-gray-400 border-b border-white/10 mb-1">
+                 Signed in as <br />
+                 <span className="text-white font-semibold truncate block">
+                    {admin?.username || "Admin"}
+                 </span>
+              </div>
 
               <button className="w-full flex items-center gap-2 px-4 py-2 text-white/90 hover:bg-white/10">
                 <User size={16} /> Profile
@@ -108,7 +115,6 @@ const handleLogout = async () => {
 
               <div className="border-t border-white/10 my-1"></div>
 
-              {/* 🔥 REAL LOGOUT */}
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center gap-2 px-4 py-2 text-red-400 hover:bg-white/10"

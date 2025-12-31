@@ -2,9 +2,13 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { carouselItems } from "../../../data/item/ItemLogin";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useRegisterAdminStore } from "../../../logic/store/auth/useRegisterAdminStore";
 
 const RegisterAdmin = () => {
+  const navigate = useNavigate();
+  const { registerAdmin, loading, error, success, resetState } = useRegisterAdminStore();
+
   const [showPassword, setShowPassword] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -14,8 +18,8 @@ const RegisterAdmin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [validationError, setValidationError] = useState("");
 
-  // AUTO SLIDE BG
   useEffect(() => {
     const timer = setInterval(
       () => setActiveIndex((prev) => (prev + 1) % carouselItems.length),
@@ -23,6 +27,16 @@ const RegisterAdmin = () => {
     );
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        resetState();
+        navigate("/admin/login");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, navigate, resetState]);
 
   const currentItem = carouselItems[activeIndex];
 
@@ -36,20 +50,32 @@ const RegisterAdmin = () => {
     exit: { opacity: 0, y: -25, transition: { duration: 0.6, ease: "easeIn" } },
   };
 
-  // PURE UI → no submit logic
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    // kosong, tidak ada logic
+    setValidationError("");
+
+    if (password !== confirmPassword) {
+      setValidationError("Passwords do not match");
+      return;
+    }
+
+    try {
+      await registerAdmin({
+        fullName,
+        username,
+        phone,
+        email,
+        password,
+      });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
     <div className="flex min-h-screen text-gray-900 relative overflow-hidden">
-
-      {/* LEFT PANEL (FORM) */}
       <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 sm:p-12 text-white relative z-20">
         <div className="w-full max-w-md">
-
-          {/* Logo */}
           <div className="flex items-center justify-center mb-8">
             <div className="flex items-center space-x-2">
               <span className="w-7 h-7 rounded-full bg-blue-400 opacity-90"></span>
@@ -60,10 +86,25 @@ const RegisterAdmin = () => {
 
           <h1 className="text-3xl font-bold mb-6 text-left">Register Admin</h1>
 
-          {/* FORM */}
-          <form onSubmit={handleRegister}>
+          {error && (
+            <div className="mb-4 p-3 bg-red-500/20 border border-red-500 rounded text-red-200 text-sm">
+              {error}
+            </div>
+          )}
 
-            {/* Full Name */}
+          {validationError && (
+            <div className="mb-4 p-3 bg-yellow-500/20 border border-yellow-500 rounded text-yellow-200 text-sm">
+              {validationError}
+            </div>
+          )}
+
+          {success && (
+            <div className="mb-4 p-3 bg-green-500/20 border border-green-500 rounded text-green-200 text-sm">
+              Registration successful! Redirecting...
+            </div>
+          )}
+
+          <form onSubmit={handleRegister}>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Full Name
@@ -77,7 +118,6 @@ const RegisterAdmin = () => {
               />
             </div>
 
-            {/* Username */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Username
@@ -91,7 +131,6 @@ const RegisterAdmin = () => {
               />
             </div>
 
-            {/* Phone */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Phone
@@ -105,7 +144,6 @@ const RegisterAdmin = () => {
               />
             </div>
 
-            {/* Email */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Email
@@ -119,7 +157,6 @@ const RegisterAdmin = () => {
               />
             </div>
 
-            {/* Password */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Password
@@ -145,7 +182,6 @@ const RegisterAdmin = () => {
               </div>
             </div>
 
-            {/* Confirm Password */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Confirm Password
@@ -159,15 +195,18 @@ const RegisterAdmin = () => {
               />
             </div>
 
-            {/* Submit */}
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white p-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 shadow-lg"
+              disabled={loading}
+              className={`w-full text-white p-3 rounded-lg font-semibold transition duration-300 shadow-lg ${
+                loading
+                  ? "bg-blue-800 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
             >
-              Create Admin Account
+              {loading ? "Processing..." : "Create Admin Account"}
             </button>
 
-            {/* Login link */}
             <div className="text-center mt-8">
               <span className="text-sm text-gray-400">
                 Already admin?{" "}
@@ -179,14 +218,11 @@ const RegisterAdmin = () => {
                 </Link>
               </span>
             </div>
-
           </form>
         </div>
       </div>
 
-      {/* RIGHT PANEL (BACKGROUND SLIDER) */}
       <div className="hidden md:flex md:w-1/2 items-center justify-center p-8 lg:p-12 relative overflow-hidden">
-
         <AnimatePresence mode="wait">
           <motion.div
             key={activeIndex}
@@ -230,7 +266,6 @@ const RegisterAdmin = () => {
           </div>
         </div>
       </div>
-
     </div>
   );
 };

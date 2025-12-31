@@ -1,11 +1,11 @@
 import axios from "axios";
 import { AuthHeader } from "./auth_header_helper";
+import { API } from "../constant/api_constant";
 
 export const http = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL, // atau API.BASE_URL
+  baseURL: API.BASE_URL,
 });
 
-// AUTO inject header token
 http.interceptors.request.use(
   (config) => {
     config.headers = {
