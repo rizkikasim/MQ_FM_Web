@@ -51,10 +51,13 @@ const AudioUpload = () => {
     data.append("title", formData.title);
     data.append("description", formData.description);
     data.append("category_id", parseInt(formData.category_id));
-    data.append("file", file);
+    
+    // PERBAIKAN: Sesuaikan key dengan Backend Go
+    data.append("audio_file", file); 
     
     if (thumbnail) {
-      data.append("thumbnail", thumbnail);
+      // PERBAIKAN: Sesuaikan key dengan Backend Go
+      data.append("thumbnail_file", thumbnail);
     }
 
     try {

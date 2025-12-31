@@ -14,7 +14,7 @@ export const useBannerLandingStore = create((set, get) => ({
   currentTime: 0,
 
   setRefs: (refs) => set(refs),
-s
+
   initFirstAudio: () => {
     const { selectedSlide, audioRef, updateProgress, handleEnded } = get();
     let audio = audioRef;

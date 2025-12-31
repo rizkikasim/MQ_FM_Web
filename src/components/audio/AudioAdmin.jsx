@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Search, Filter, Play, MoreVertical, Loader, AlertCircle, Trash2, Edit } from "lucide-react";
+import { Plus, Search, Filter, Play, Edit, Trash2, Loader, AlertCircle } from "lucide-react";
 import bgDashboard from "../../assets/images/img_bg_dashboard_2.jpg";
 import DashboardNavHeader from "../navbar/DashboardNavHeader";
 import { useGetAudiosStore } from "../../logic/store/audio/useGetAudiosStore";
 import { useGetCategoriesStore } from "../../logic/store/category/useGetCategoriesStore";
 import { useDeleteAudioStore } from "../../logic/store/audio/useDeleteAudioStore";
+import { API } from "../../core/constant/api_constant"; // 1. Import API Constant
 
 const AudioAdmin = () => {
   const navigate = useNavigate();
@@ -130,7 +131,16 @@ const AudioAdmin = () => {
                       <td className="p-4">
                         <div className="w-10 h-10 rounded-lg overflow-hidden bg-white/10 flex items-center justify-center relative">
                           {item.thumbnail ? (
-                            <img src={item.thumbnail} alt="cover" className="w-full h-full object-cover" />
+                            // 2. Gunakan API.BASE_URL agar gambar muncul
+                            <img 
+                              src={`${API.BASE_URL}/${item.thumbnail}`} 
+                              alt="cover" 
+                              className="w-full h-full object-cover" 
+                              onError={(e) => {
+                                e.target.onerror = null; 
+                                e.target.src = "https://placehold.co/100?text=No+Img"; // Fallback jika gambar error
+                              }}
+                            />
                           ) : (
                             <Play size={16} fill="currentColor" />
                           )}
