@@ -1,34 +1,28 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-import HomePage from "../home/HomePage";
-import Login from "../components/auth/Login";
-import Register from "../components/auth/Register";
-import DashboardUser from "../dashboard/user/DashboardUser";
+import LandingPage from "../components/landing/pages/LandingPage";
 import PlayerScreen from "../core/shared/player/playerScreen";
-import ProtectedRoute from "./ProtectedRoute";
 
 import ProtectedAdminRoute from "./ProtectedAdminRoute";
 import RegisterAdmin from "../components/auth/admin/Register";
 import LoginAdmin from "../components/auth/admin/Login";
-import DashboardAdmin from "../dashboard/admin/DashboardAdmin";
+import DashboardPage from "../components/admin/pages/DashboardPage";
 
-import AudioAdmin from "../components/audio/AudioAdmin";
-import AudioUpload from "../components/audio/AudioUpload";
-import AudioEdit from "../components/audio/AudioEdit";
+import AudioAdmin from "../components/admin/pages/audio/AudioAdmin";
+import AudioUpload from "../components/admin/pages/audio/AudioUpload";
+import AudioEdit from "../components/admin/pages/audio/AudioEdit";
 
-import CategoryAdmin from "../components/category/CategoryAdmin";
-import CategoryCreate from "../components/category/CategoryCreate";
-import CategoryEdit from "../components/category/CategoryEdit";
+import CategoryAdmin from "../components/admin/pages/category/CategoryAdmin";
+import CategoryCreate from "../components/admin/pages/category/CategoryCreate";
+import CategoryEdit from "../components/admin/pages/category/CategoryEdit";
 
 
 function AppRouter() {
-  const [token, setToken] = useState(localStorage.getItem("token"));
   const [adminToken, setAdminToken] = useState(localStorage.getItem("admin_token"));
 
   useEffect(() => {
     const sync = () => {
-      setToken(localStorage.getItem("token"));
       setAdminToken(localStorage.getItem("admin_token"));
     };
     window.addEventListener("storage", sync);
@@ -38,17 +32,14 @@ function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={token ? <Navigate to="/dashboard" replace /> : <Login />} />
-        <Route path="/register" element={token ? <Navigate to="/dashboard" replace /> : <Register />} />
-        <Route path="/dashboard" element={<ProtectedRoute><DashboardUser /></ProtectedRoute>} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/player" element={<PlayerScreen />} />
 
         <Route path="/admin/login" element={adminToken ? <Navigate to="/admin/dashboard" replace /> : <LoginAdmin />} />
         <Route path="/admin/register" element={adminToken ? <Navigate to="/admin/dashboard" replace /> : <RegisterAdmin />} />
 
-        <Route path="/admin/dashboard" element={<ProtectedAdminRoute><DashboardAdmin /></ProtectedAdminRoute>} />
-        
+        <Route path="/admin/dashboard" element={<ProtectedAdminRoute><DashboardPage /></ProtectedAdminRoute>} />
+
         <Route path="/admin/category" element={<ProtectedAdminRoute><CategoryAdmin /></ProtectedAdminRoute>} />
         <Route path="/admin/category/create" element={<ProtectedAdminRoute><CategoryCreate /></ProtectedAdminRoute>} />
         <Route path="/admin/category/edit/:id" element={<ProtectedAdminRoute><CategoryEdit /></ProtectedAdminRoute>} />
