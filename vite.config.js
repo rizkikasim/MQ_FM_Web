@@ -10,6 +10,12 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      // TAMBAHKAN BAGIAN INI:
+      '/uploads': {
+        target: 'https://angella-nevoid-becalmingly.ngrok-free.dev',
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
 })
