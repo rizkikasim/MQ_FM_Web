@@ -11,7 +11,13 @@ const AudioListTable = ({
     onDelete,
     navigate
 }) => {
-    // Helper to get category name
+    const getAssetUrl = (path) => {
+        if (!path) return null;
+        const baseUrl = API.BASE_URL.replace(/\/api\/?$/, "");
+        const cleanPath = path.startsWith("/") ? path.substring(1) : path;
+        return `${baseUrl}/${cleanPath}`;
+    };
+
     const getCategoryName = (id) => {
         const category = categories.find((c) => c.id === id);
         return category ? category.name : "Unknown";
@@ -45,7 +51,7 @@ const AudioListTable = ({
                                     <div className="w-10 h-10 rounded-lg overflow-hidden bg-white/10 flex items-center justify-center relative">
                                         {item.thumbnail ? (
                                             <img
-                                                src={`${API.BASE_URL}/${item.thumbnail}`}
+                                                src={getAssetUrl(item.thumbnail)}
                                                 alt="cover"
                                                 className="w-full h-full object-cover"
                                                 onError={(e) => {
@@ -61,6 +67,15 @@ const AudioListTable = ({
                                 <td className="p-4">
                                     <div className="font-medium">{item.title}</div>
                                     <div className="text-sm text-white/50 truncate max-w-xs">{item.description}</div>
+                                    {item.audio_url && (
+                                        <audio
+                                            controls
+                                            className="mt-2 w-full h-8 max-w-[200px]"
+                                            src={getAssetUrl(item.audio_url)}
+                                        >
+                                            Your browser does not support the audio element.
+                                        </audio>
+                                    )}
                                 </td>
                                 <td className="p-4">
                                     <span className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded text-xs">
