@@ -4,7 +4,7 @@ import BannerMacResponsive from "../../../../core/responsive/mac/BannerMacRespon
 import BannerMobileResponsive from "../../../../core/responsive/mobile/BannerMobileResponsive";
 import BannerIpadResponsive from "../../../../core/responsive/ipad/BannerIpadResponsive";
 import { useBannerLandingStore } from "../../../../core/logic/landing/useBannerLandingStore";
-import TrackPlayer from "../../../../core/shared/trackPlayer/TrackPlayer";
+import TrackPlayer from "../../../../core/shared/trackplayer/TrackPlayer";
 
 export default function HeroBanner() {
     const {
